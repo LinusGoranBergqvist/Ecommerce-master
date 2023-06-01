@@ -1,0 +1,53 @@
+﻿@model Cart
+
+<h1>Kundvagnen</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Produkt</th>
+            <th><span class="ms-3">Antal</span></th>
+            <th>Pris</th>
+            <th>Totalt</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (CartItem cartItem in Model.CartItems)
+        {
+            <tr>
+                <td>@cartItem.Product.Name</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <form asp-action="DecrementProductInCart" asp-controller="Cart" method="POST">
+                            <input hidden name="productId" value="@cartItem.ProductId">
+                            <button type="submit" class="btn btn-primary btn-sm" style="width: 27px;">-</button>
+                        </form>
+                        @cartItem.Quantity
+                        <form asp-action="IncrementProductInCart" asp-controller="Cart" method="POST">
+                            <input hidden name="productId" value="@cartItem.ProductId">
+                            <button type="submit" class="btn btn-primary btn-sm" style="width: 27px;">+</button>
+                        </form>
+                    </div>
+                </td>
+                <td>@cartItem.Product.PriceSEK</td>
+                <td>@(cartItem.Quantity * @cartItem.Product.PriceSEK)</td>
+                <form asp-action="DeleteCartItem" asp-controller="Cart" method="POST">
+                    <input hidden name="removeId" value="@cartItem.Id">
+                    <td><input type="submit" class="btn btn-primary" value="Ta bort från kundvagn" /></td>
+                </form>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="d-flex justify-content-between">
+    <form asp-action="EmptyCart" asp-controller="Cart" method="POST" style="display:inline;">
+        <input hidden name="emptyCart" value="@Model.Id">
+        <input type="submit" class="btn btn-danger" value="Rensa kundvagn" />
+    </form>
+
+    <form asp-action="Index" asp-controller="Checkout" method="POST" style="display:inline;">
+        <input hidden name="cartId" value="@Model.Id">
+        <input type="submit" class="btn btn-success" value="Checka ut" />
+    </form>
+</div>
