@@ -1,0 +1,108 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CurryFit.model.api;
+using CurryFit.model.firebase;
+using CurryFit.model.util;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+
+namespace CurryFit.view.NutritionPages.Supplements
+{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class SupplementScannedBarcodePage : ContentPage
+    {
+        private readonly IFirebaseService firebaseService = DependencyService.Get<IFirebaseService>();
+        private readonly IFirebaseUserService firebaseUserService = DependencyService.Get<IFirebaseUserService>();
+        private readonly bool scanned;
+
+        public SupplementScannedBarcodePage(SupplementProduct supplementProduct, string Gtin, bool hasScanned, string meal, string TitleText = "")
+        {
+            InitializeComponent();
+            Title.Text = TitleText;
+            var (xamarinHeight, xamarinWidth) = DeviceUtility.GetXamarinDisplaySize();
+            scanned = hasScanned;
+
+            // Set the binding context
+            BindingContext = supplementProduct;
+            SupplementName.Text = supplementProduct.Name;
+            SupplementGtin.Text = Gtin;
+            SupplementBrand.Text = supplementProduct.Brand;
+            SupplementCategory.Text = supplementProduct.Category;
+
+            // Set Vitamins
+            if (supplementProduct.VitaminList != null)
+            {
+                SupplementVitamins.ItemsSource = supplementProduct.VitaminList
+                    .Select(vitamin => new { VitaminInfo = $"{vitamin.VitaminName}: {vitamin.VitaminAmount} {vitamin.VitaminUnit}" });
+            }
+
+            // Set Minerals
+            if (supplementProduct.MineralList != null)
+            {
+                SupplementMinerals.ItemsSource = supplementProduct.MineralList
+                    .Select(mineral => new { MineralInfo = $"{mineral.MineralName}: {mineral.MineralAmount} {mineral.MineralUnit}" });
+            }
+        }
+    }
+}
+
+
+
+
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="CurryFit.view.NutritionPages.Supplements.SupplementScannedBarcodePage"
+             xmlns:zxing="clr-namespace:ZXing.Net.Mobile.Forms;assembly=ZXing.Net.Mobile.Forms"
+             xmlns:yummi="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:supplements="clr-namespace:CurryFit.view.NutritionPages.Supplements"
+             BackgroundColor="black">
+
+    <StackLayout Margin="20">
+
+        <Label x:Name="Title" Text="scanned barcode" TextTransform="Uppercase" HorizontalTextAlignment="Center"/>
+        <Label Text="Supplement Information" FontSize="Title" FontAttributes="Bold" HorizontalOptions="Center" Margin="0,10,0,20"/>
+
+        <!-- Name -->
+        <Label Text="Name:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <Label x:Name="SupplementName" FontSize="Body"/>
+
+        <!-- Brand -->
+        <Label Text="Brand:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <Label x:Name="SupplementBrand" FontSize="Body"/>
+        
+        <Label Text="Gtin:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <Label x:Name="SupplementGtin" FontSize="Body"/>
+
+        <!-- Vitamins -->
+        <Label Text="Vitamins:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <CollectionView x:Name="SupplementVitamins" Margin="0,0,0,20">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout>
+                        <Label Text="{Binding VitaminInfo}" FontSize="Body"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Minerals -->
+        <Label Text="Minerals:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <CollectionView x:Name="SupplementMinerals" Margin="0,0,0,20">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <StackLayout>
+                        <Label Text="{Binding MineralInfo}" FontSize="Body"/>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Category -->
+        <Label Text="Category:" FontSize="Subtitle" FontAttributes="Bold"/>
+        <Label x:Name="SupplementCategory" FontSize="Body"/>
+
+    </StackLayout>
+
+</ContentPage>

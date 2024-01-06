@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:api="clr-namespace:CurryFit.model.api;assembly=CurryFit"
+             xmlns:util="clr-namespace:CurryFit.model.util;assembly=CurryFit"
+             x:Class="CurryFit.view.NutritionPages.Supplements.SupplementSearchResult">
+    <ContentView.Resources>
+        <util:MacroBoxViewWidthConverter x:Key="ProportionalWidthConverter" />
+    </ContentView.Resources>
+    <ContentView.Content>
+        <CollectionView x:Name="SearchResults"  Opacity="1" VerticalScrollBarVisibility="Never" Margin="0,-10,0,0" BackgroundColor="{DynamicResource Black}">
+            <CollectionView.ItemTemplate >
+                <DataTemplate x:DataType="api:SupplementProduct">
+                    <StackLayout Spacing="10" Padding="10,0,10,0">
+                        <Frame x:Name="SearchResultFrame" Padding="5" CornerRadius="10" BorderColor="Transparent" Margin="0,10,0,0">
+                            <Frame.Background>
+                                <LinearGradientBrush>
+                                    <GradientStop Color="{DynamicResource GradientGary1}" Offset="0.1"/>
+                                    <GradientStop Color="{DynamicResource GradientGary2}" Offset="0.5"/>
+                                    <GradientStop Color="{DynamicResource GradientGary3}" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Frame.Background>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="Clicked_SearchResult" CommandParameter="{Binding Name, Mode=Default}"></TapGestureRecognizer>
+                            </Frame.GestureRecognizers>
+                            <StackLayout Orientation="Horizontal" Spacing="0">
+                                <StackLayout Margin="5,0,0,0" Spacing="0" HorizontalOptions="StartAndExpand">
+                                    <Label Text="{Binding Name, Mode=Default}" TextColor="{DynamicResource RiceWhite}" FontSize="14" FontFamily="N" LineBreakMode="WordWrap" Margin="0,0,0,0" />
+                                    <Label Text="{Binding Brand, Mode=Default}" TextColor="{DynamicResource RiceWhite}" FontSize="12" FontFamily="N" LineBreakMode="WordWrap" Margin="0,0,0,0" />
+                                </StackLayout>
+                            </StackLayout>
+                        </Frame>
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ContentView.Content>
+</ContentView>
+
+
+using CurryFit.model.api;
+using CurryFit.model.util;
+using System;
+using System.Collections.Generic;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+
+namespace CurryFit.view.NutritionPages.Supplements
+{
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class SupplementSearchResult : ContentView
+    {
+        private string context = "";
+        public SupplementSearchResult()
+        {
+            InitializeComponent();
+
+            SearchResults.ItemsLayout = new GridItemsLayout(1, ItemsLayoutOrientation.Vertical)
+            {
+                SnapPointsAlignment = SnapPointsAlignment.Center,
+                SnapPointsType = SnapPointsType.Mandatory
+            };
+            BindingContext = this;
+
+
+        }
+        private async void Clicked_SearchResult(object sender, EventArgs e)
+        {
+            String TitleText = "Edit Nutrition";
+            var selectedItem = (sender as Frame)?.BindingContext as SupplementProduct;
+            var selectedItemName = selectedItem?.Name;
+            if (!string.IsNullOrEmpty(selectedItemName))
+            {
+                await Navigation.PushAsync(new SupplementScannedBarcodePage(selectedItem, selectedItem.productInfo.Gtin, false, context, TitleText));
+            }
+        }
+
+        public void SetItemSource(IEnumerable<SupplementProduct> products)
+        {
+            SearchResults.ItemsSource = products;
+        }
+
+        public void SetContext(string searchContext)
+        {
+            context = searchContext;
+        }
+
+
+    }
+}
